@@ -1,0 +1,31 @@
+upstream docker-app {
+	server app:9000;
+}
+
+server {
+	listen 80;
+
+	charset utf-8;
+
+	root /app/public;
+
+	error_log /var/log/nginx/error.log;
+	access_log /var/log/nginx/access.log;
+
+	location = /index.php {
+		# Mitigate https://httpoxy.org/ vulnerabilities
+		fastcgi_param HTTP_PROXY "";
+
+		fastcgi_pass docker-app;
+		fastcgi_index index.php;
+
+		include fastcgi_params;
+
+		fastcgi_param SCRIPT_FILENAME $document_root/$fastcgi_script_name;
+		fastcgi_param SERVER_NAME $server_name;
+	}
+
+	location / {
+		rewrite ^ /index.php last;
+	}
+}

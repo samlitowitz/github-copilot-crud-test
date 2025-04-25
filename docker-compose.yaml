@@ -1,10 +1,6 @@
 services:
-    php:
+    app:
         image: php:8.3.20-fpm-alpine3.20
-        entrypoint: [ "/usr/local/bin/php" ]
-        command: [ "/app/bin/crud-app" ]
-        ports:
-            - "8081:80"
         environment:
             - DB_HOST=db:5432
             - DB_USER_FILE=/run/secrets/db-user
@@ -20,6 +16,17 @@ services:
         working_dir: /app
         volumes:
             - ./:/app
+
+    nginx:
+        image: nginx:alpine3.17
+        depends_on:
+            - app
+        networks:
+            - crud-app
+        ports:
+            - "8080:80"
+        volumes:
+            - ./docker/nginx/config.nginx:/etc/nginx/conf.d/default.conf:ro
 
     phpunit:
         image: php:8.3.20-fpm-alpine3.20
