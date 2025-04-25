@@ -1,6 +1,9 @@
 services:
     app:
-        image: php:8.3.20-fpm-alpine3.20
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: app
         environment:
             - DB_HOST=db
             - DB_PORT=5432
@@ -32,7 +35,10 @@ services:
             - ./docker/nginx/config.nginx:/etc/nginx/conf.d/default.conf:ro
 
     phpunit:
-        image: php:8.3.20-fpm-alpine3.20
+        build:
+            context: .
+            dockerfile: Dockerfile
+            target: app
         entrypoint: [ "/usr/local/bin/php" ]
         command: [ "/app/vendor/bin/phpunit" ]
         working_dir: "/app"

@@ -1,4 +1,4 @@
-PHP_DOCKER_SERVICE=php
+PHP_DOCKER_SERVICE=app
 
 shell: docker-compose.yaml
 	docker-compose run --rm --remove-orphans --entrypoint=/bin/sh ${PHP_DOCKER_SERVICE}
