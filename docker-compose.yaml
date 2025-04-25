@@ -1,0 +1,59 @@
+services:
+    php:
+        image: php:8.3.20-fpm-alpine3.20
+        entrypoint: [ "/usr/local/bin/php" ]
+        command: [ "/app/bin/crud-app" ]
+        ports:
+            - "8081:80"
+        environment:
+            - DB_HOST=db:5432
+            - DB_USER_FILE=/run/secrets/db-user
+            - DB_PASSWORD_FILE=/run/secrets/db-password
+        depends_on:
+            - db
+        networks:
+            - crud-app
+        secrets:
+            - db-user
+            - db-password
+        user: "${DOCKER_USER}"
+        working_dir: /app
+        volumes:
+            - ./:/app
+
+    phpunit:
+        image: php:8.3.20-fpm-alpine3.20
+        entrypoint: [ "/usr/local/bin/php" ]
+        command: [ "/app/vendor/bin/phpunit" ]
+        working_dir: "/app"
+        user: "${DOCKER_USER}"
+        volumes:
+            - ./:/app
+
+    db:
+        image: postgres:16-alpine
+        environment:
+            - PGDATA=/var/lib/postgresql/data/pgdata
+            - POSTGRES_USER_FILE=/run/secrets/db-user
+            - POSTGRES_PASSWORD_FILE=/run/secrets/db-password
+        expose:
+            - 5432
+        ports:
+            - "127.0.0.1:5432:5432"
+        networks:
+            - crud-app
+        secrets:
+            - db-user
+            - db-password
+        volumes:
+            - "./data/db:/var/lib/postgresql/data"
+
+networks:
+    crud-app:
+        name: crud-app
+
+secrets:
+    db-user:
+        file: docker/db/secrets/user
+    db-password:
+        file: docker/db/secrets/password
